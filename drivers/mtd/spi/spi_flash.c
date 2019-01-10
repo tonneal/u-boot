@@ -460,6 +460,8 @@ int spi_flash_cmd_erase_ops(struct spi_flash *flash, u32 offset, size_t len)
 	u8 cmd[SPI_FLASH_CMD_LEN + 1];
 	int ret = -1;
 	u32 cmdlen;
+	u32 toplen = len;
+
 #if defined(CONFIG_SF_DUAL_FLASH) || defined(CONFIG_SPI_FLASH_BAR)
 	u32 bank_addr;
 #endif
@@ -520,6 +522,8 @@ int spi_flash_cmd_erase_ops(struct spi_flash *flash, u32 offset, size_t len)
 
 		offset += erase_size;
 		len -= erase_size;
+		printf("\rErasing %2i %% completed  ", (toplen-len)/(toplen/100)  );
+	
 	}
 
 	if (flash->spi->bytemode != SPI_4BYTE_MODE) {
