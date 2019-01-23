@@ -323,6 +323,7 @@ static int zynq_phy_init(struct udevice *dev)
 			SUPPORTED_1000baseT_Half |
 			SUPPORTED_1000baseT_Full;
 
+#ifndef CONFIG_PHY_FIXED
 	/* Enable only MDIO bus */
 	writel(ZYNQ_GEM_NWCTRL_MDEN_MASK, &regs->nwctrl);
 
@@ -334,6 +335,7 @@ static int zynq_phy_init(struct udevice *dev)
 			return ret;
 		}
 	}
+#endif
 
 	priv->phydev = phy_connect(priv->bus, priv->phyaddr, dev,
 				   priv->interface);
