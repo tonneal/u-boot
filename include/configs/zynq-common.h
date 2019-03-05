@@ -158,7 +158,7 @@
 
 /* cc108 requires to be 0xF00000 to have boot.bin with bitstream included */
 # ifndef CONFIG_ENV_OFFSET
-#  define CONFIG_ENV_OFFSET		0xE0000
+#  define CONFIG_ENV_OFFSET		0x101C0000
 # endif
 #endif
 
@@ -210,7 +210,71 @@
 /* Default environment */
 #ifndef CONFIG_EXTRA_ENV_SETTINGS
 #define CONFIG_EXTRA_ENV_SETTINGS	\
-	"ethaddr=00:0a:35:00:01:22\0"	\
+	"blr_fname=BOOT.bin\0" \
+	"env_fname=uEnt.txt\0" \
+	"dtb_fname=devicetree.dtb\0" \
+	"bit_fname=system.bit\0" \
+	"knl_fname=uImage\0" \
+	"rfs_fname=rootfs.jffs2\0" \
+	"opt_fname=opt.jffs2\0" \
+	"ufs_fname=rootfs.cpio.uboot\0" \
+	"blr_loadaddr=0x10000000\0" \
+	"env_loadaddr=0x101C0000\0" \
+	"dtb_loadaddr=0x10200000\0" \
+	"bit_loadaddr=0x13300000\0" \
+	"knl_loadaddr=0x10300000\0" \
+	"rfs_loadaddr=0x10D00000\0" \
+	"opt_loadaddr=0x12000000\0" \
+	"blr_spifaddr=0x00000000\0" \
+	"env_spifaddr=0x001C0000\0" \
+	"dtb_spifaddr=0x00200000\0" \
+	"bit_spifaddr=0x03300000\0" \
+	"knl_spifaddr=0x00300000\0" \
+	"rfs_spifaddr=0x00D00000\0" \
+	"opt_spifaddr=0x02000000\0" \
+	"blr_partsize=0x000E0000\0" \
+	"env_partsize=0x00020000\0" \
+	"dtb_partsize=0x00080000\0" \
+	"bit_partsize=0x00D00000\0" \
+	"knl_partsize=0x00500000\0" \
+	"rfs_partsize=0x01300000\0" \
+	"opt_partsize=0x01300000\0" \
+	"erase_blr=echo Erase Bootloader......; sf erase ${blr_spifaddr} ${blr_partsize}\0" \
+	"erase_dtb=echo Erase Devicetree......; sf erase ${dtb_spifaddr} ${dtb_partsize}\0" \
+	"erase_bit=echo Erase Bitstream.......; sf erase ${bit_spifaddr} ${bit_partsize}\0" \
+	"erase_knl=echo Erase Kernel..........; sf erase ${knl_spifaddr} ${knl_partsize}\0" \
+	"erase_rfs=echo Erase Rootfs..........; sf erase ${rfs_spifaddr} ${rfs_partsize}\0" \
+	"flash_blr=echo Flash Bootloader......; mw.b ${blr_loadaddr} 0xFF ${blr_partsize}; fatload mmc 0 ${blr_loadaddr} ${blr_fname}; sf write ${blr_loadaddr} ${blr_spifaddr} ${blr_partsize}\0" \
+	"flash_dtb=echo Flash Devicetree......; mw.b ${dtb_loadaddr} 0xFF ${dtb_partsize}; fatload mmc 0 ${dtb_loadaddr} ${dtb_fname}; sf write ${dtb_loadaddr} ${dtb_spifaddr} ${dtb_partsize}\0" \
+	"flash_bit=echo Flash Bitstream.......; mw.b ${bit_loadaddr} 0xFF ${bit_partsize}; fatload mmc 0 ${bit_loadaddr} ${bit_fname}; sf write ${bit_loadaddr} ${bit_spifaddr} ${bit_partsize}\0" \
+	"flash_knl=echo Flash Kernel..........; mw.b ${knl_loadaddr} 0xFF ${knl_partsize}; fatload mmc 0 ${knl_loadaddr} ${knl_fname}; sf write ${knl_loadaddr} ${knl_spifaddr} ${knl_partsize}\0" \
+	"flash_rfs=echo Flash Rootfs..........; mw.b ${rfs_loadaddr} 0xFF ${rfs_partsize}; fatload mmc 0 ${rfs_loadaddr} ${rfs_fname}; sf write ${rfs_loadaddr} ${rfs_spifaddr} ${rfs_partsize}\0" \
+	"flash_opt=echo Flash Opt part........; mw.b ${opt_loadaddr} 0xFF ${opt_partsize}; fatload mmc 0 ${opt_loadaddr} ${opt_fname}; sf write ${opt_loadaddr} ${opt_spifaddr} ${opt_partsize}\0" \
+	"updatesys=sf probe 0; sf erase 0 0x4000000; run flash_blr; run flash_dtb; run flash_bit; run flash_knl; run flash_rfs; run flash_opt; echo Flash Programming DONE \0" \
+	"sf_boot=sf probe 0 ; " \
+		"sf read ${bit_loadaddr} ${bit_spifaddr} ${bit_partsize}; " \
+		"fpga loadb 0 ${bit_loadaddr} ${bit_partsize}; " \
+		"sf read ${knl_loadaddr} ${knl_spifaddr} ${knl_partsize}; " \
+		"sf read ${dtb_loadaddr} ${dtb_spifaddr} ${dtb_partsize}; " \
+		"run jffs2_args; " \
+		"bootm ${knl_loadaddr} - ${dtb_loadaddr}\0 " \
+	"jffs2_args=setenv bootargs console=ttyPS0,115200 " \
+		"root=/dev/mtdblock8 rootfstype=jffs2 rw rootwait uio_pdrv_genirq.of_id=generic-uio ${optargs} \0" \
+	"ram_boot=if mmcinfo; then " \
+		"run uenvboot; " \
+		"mmc rescan; " \
+		"mmc dev 0; " \
+		"fatload mmc 0 ${bit_loadaddr} ${bit_fname}; " \
+		"fpga loadb 0 ${bit_loadaddr} ${bit_partsize}; " \
+		"fatload mmc 0 ${knl_loadaddr} ${knl_fname}; " \
+		"fatload mmc 0 ${dtb_loadaddr} ${dtb_fname}; " \
+		"fatload mmc 0 ${rfs_loadaddr} ${ufs_fname}; " \
+		"run ram_args; " \
+		"bootm ${knl_loadaddr} ${rfs_loadaddr} ${dtb_loadaddr}; " \
+		"fi\0" \
+	"ram_args=setenv bootargs console=ttyPS0,115200 " \
+		"root=/dev/ram rw earlyprintk${optargs} \0" \
+	"net_boot=\0" \
 	"kernel_image=uImage\0"	\
 	"kernel_load_address=0x2080000\0" \
 	"ramdisk_image=uramdisk.image.gz\0"	\
@@ -241,19 +305,6 @@
 		"mmcinfo && " \
 		"load mmc 0 ${loadbit_addr} ${bitstream_image} && " \
 		"fpga load 0 ${loadbit_addr} ${filesize}\0" \
-	"norboot=echo Copying Linux from NOR flash to RAM... && " \
-		"cp.b 0xE2100000 ${kernel_load_address} ${kernel_size} && " \
-		"cp.b 0xE2600000 ${devicetree_load_address} ${devicetree_size} && " \
-		"echo Copying ramdisk... && " \
-		"cp.b 0xE2620000 ${ramdisk_load_address} ${ramdisk_size} && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"qspiboot=echo Copying Linux from QSPI flash to RAM... && " \
-		"sf probe 0 0 0 && " \
-		"sf read ${kernel_load_address} 0x100000 ${kernel_size} && " \
-		"sf read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
-		"echo Copying ramdisk... && " \
-		"sf read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
 			"echo Loaded environment from ${bootenv}; " \
@@ -263,41 +314,13 @@
 			"echo Running uenvcmd ...; " \
 			"run uenvcmd; " \
 		"fi\0" \
-	"sdboot=if mmcinfo; then " \
-			"run uenvboot; " \
+	"sd_boot=if mmcinfo; then " \
 			"echo Copying Linux from SD to RAM... && " \
-			"load mmc 0 ${kernel_load_address} ${kernel_image} && " \
-			"load mmc 0 ${devicetree_load_address} ${devicetree_image} && " \
-			"load mmc 0 ${ramdisk_load_address} ${ramdisk_image} && " \
-			"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}; " \
+			"load mmc 0 ${knl_loadaddr} ${knl_fname} && " \
+			"load mmc 0 ${dtb_loadaddr} ${dtb_fname} && " \
+			"load mmc 0 ${rfs_loadaddr} ${ufs_fname} && " \
+			"bootm ${knl_loadaddr} ${rfs_loadaddr} ${dtb_loadaddr}; " \
 		"fi\0" \
-	"usbboot=if usb start; then " \
-			"run uenvboot; " \
-			"echo Copying Linux from USB to RAM... && " \
-			"load usb 0 ${kernel_load_address} ${kernel_image} && " \
-			"load usb 0 ${devicetree_load_address} ${devicetree_image} && " \
-			"load usb 0 ${ramdisk_load_address} ${ramdisk_image} && " \
-			"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}; " \
-		"fi\0" \
-	"nandboot=echo Copying Linux from NAND flash to RAM... && " \
-		"nand read ${kernel_load_address} 0x100000 ${kernel_size} && " \
-		"nand read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
-		"echo Copying ramdisk... && " \
-		"nand read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"jtagboot=echo TFTPing Linux to RAM... && " \
-		"tftpboot ${kernel_load_address} ${kernel_image} && " \
-		"tftpboot ${devicetree_load_address} ${devicetree_image} && " \
-		"tftpboot ${ramdisk_load_address} ${ramdisk_image} && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"rsa_norboot=echo Copying Image from NOR flash to RAM... && " \
-		"cp.b 0xE2100000 0x100000 ${boot_size} && " \
-		"zynqrsa 0x100000 && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"rsa_nandboot=echo Copying Image from NAND flash to RAM... && " \
-		"nand read 0x100000 0x0 ${boot_size} && " \
-		"zynqrsa 0x100000 && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	"rsa_qspiboot=echo Copying Image from QSPI flash to RAM... && " \
 		"sf probe 0 0 0 && " \
 		"sf read 0x100000 0x0 ${boot_size} && " \
@@ -305,10 +328,6 @@
 		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	"rsa_sdboot=echo Copying Image from SD to RAM... && " \
 		"load mmc 0 0x100000 ${boot_image} && " \
-		"zynqrsa 0x100000 && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"rsa_jtagboot=echo TFTPing Image to RAM... && " \
-		"tftpboot 0x100000 ${boot_image} && " \
 		"zynqrsa 0x100000 && " \
 		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 		DFU_ALT_INFO \
