@@ -43,29 +43,12 @@
 &gem0 {
 	status = "okay";
 	phy-mode = "rgmii-id";
-//	phy-handle = <&ethernet_phy>;
-
-//	ethernet_phy: ethernet-phy@0 {
-//		reg = <0>;
-//		device_type = "fixed-link";
-//		fixed-link {
-//	    	speed = <1000>;
-//	    	full-duplex;
-//		};
-//	};
-
 	phy-handle = <&ethernet_phy>;
-	ethernet_phy: fixed-link {
-		reg = <0>;
-		device_type = "fixed-link";
-		speed = <1000>;
-	    full-duplex;
-		fixed-link {
-	    	speed = <1000>;
-	    	full-duplex;
-		};
-	};
 
+	ethernet_phy: ethernet-phy@0 {
+		reg = <0>;
+		device_type = "ethernet-phy";
+	};
 };
 
 &qspi {
@@ -106,6 +89,10 @@
 
 &sdhci0 {
 	u-boot,dm-pre-reloc;
+	status = "okay";
+};
+
+&sdhci1 {
 	status = "okay";
 };
 
