@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <asm/io.h>
 #include <fdtdec.h>
 #include <fpga.h>
 #include <mmc.h>
@@ -33,7 +34,7 @@ static xilinx_desc fpga100 = XILINX_XC7Z100_DESC(0x100);
 #endif
 
 int board_init(void)
-{
+{	printf("%s\n",__FUNCTION__);
 #if defined(CONFIG_ENV_IS_IN_EEPROM) && !defined(CONFIG_SPL_BUILD)
 	unsigned char eepromsel = CONFIG_SYS_I2C_MUX_EEPROM_SEL;
 #endif
@@ -77,6 +78,8 @@ int board_init(void)
 	}
 #endif
 
+	writel(0x00000601,0xF8000700);
+
 #if (defined(CONFIG_FPGA) && !defined(CONFIG_SPL_BUILD)) || \
     (defined(CONFIG_SPL_FPGA_SUPPORT) && defined(CONFIG_SPL_BUILD))
 	fpga_init();
@@ -91,6 +94,7 @@ int board_init(void)
 
 int board_late_init(void)
 {
+	printf("%s\n",__FUNCTION__);
 	switch ((zynq_slcr_get_boot_mode()) & ZYNQ_BM_MASK) {
 	case ZYNQ_BM_QSPI:
 		env_set("modeboot", "sf_boot");
@@ -112,12 +116,15 @@ int board_late_init(void)
 		break;
 	}
 
+	printf("reg=0x%04X\n", readl(0xF8000700) );
+	writel(0x00000601,0xF8000700);
+	printf("reg=0x%04X\n", readl(0xF8000700) );
 	return 0;
 }
 
 #ifdef CONFIG_DISPLAY_BOARDINFO
 int checkboard(void)
-{
+{	printf("%s\n",__FUNCTION__);
 	u32 version = zynq_get_silicon_version();
 
 	version <<= 1;
@@ -132,7 +139,7 @@ int checkboard(void)
 #endif
 
 int zynq_board_read_rom_ethaddr(unsigned char *ethaddr)
-{
+{	printf("%s\n",__FUNCTION__);
 #if defined(CONFIG_ZYNQ_GEM_EEPROM_ADDR) && \
     defined(CONFIG_ZYNQ_GEM_I2C_MAC_OFFSET)
 	if (eeprom_read(CONFIG_ZYNQ_GEM_EEPROM_ADDR,
@@ -146,12 +153,12 @@ int zynq_board_read_rom_ethaddr(unsigned char *ethaddr)
 
 #if !defined(CONFIG_SYS_SDRAM_BASE) && !defined(CONFIG_SYS_SDRAM_SIZE)
 int dram_init_banksize(void)
-{
+{	printf("%s\n",__FUNCTION__);
 	return fdtdec_setup_memory_banksize();
 }
 
 int dram_init(void)
-{
+{	printf("%s\n",__FUNCTION__);
 	if (fdtdec_setup_memory_size() != 0)
 		return -EINVAL;
 
@@ -161,7 +168,7 @@ int dram_init(void)
 }
 #else
 int dram_init(void)
-{
+{printf("%s\n",__FUNCTION__);
 	gd->ram_size = CONFIG_SYS_SDRAM_SIZE;
 
 	zynq_ddrc_init();
