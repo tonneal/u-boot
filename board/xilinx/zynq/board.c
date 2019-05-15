@@ -92,8 +92,25 @@ int board_init(void)
 	return 0;
 }
 
+void generate_partition_table(void)
+{
+	struct mmc *mmc = find_mmc_device(1);
+	unsigned int capacity_gb = 0;
+
+	/* Retrieve eMMC size in GiB */
+	if (mmc)
+		capacity_gb = mmc->capacity / SZ_1G;
+
+	/* eMMC capacity is not exact, so asume 8GB if larger than 7GB */
+	if (capacity_gb >= 3)
+		env_set("emmcparts", LINUX_4GB_PARTITION_TABLE);
+
+}
+
 int board_late_init(void)
 {
+	char * parttable;
+
 	printf("%s\n",__FUNCTION__);
 	switch ((zynq_slcr_get_boot_mode()) & ZYNQ_BM_MASK) {
 	case ZYNQ_BM_QSPI:
@@ -119,6 +136,11 @@ int board_late_init(void)
 	printf("reg=0x%04X\n", readl(0xF8000700) );
 	writel(0x00000601,0xF8000700);
 	printf("reg=0x%04X\n", readl(0xF8000700) );
+
+	parttable = env_get("emmcparts");
+	if (!parttable)
+		//generate_partition_table();
+
 	return 0;
 }
 
