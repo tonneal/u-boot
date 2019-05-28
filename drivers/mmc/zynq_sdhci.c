@@ -207,6 +207,9 @@ static int arasan_sdhci_probe(struct udevice *dev)
 		       SDHCI_QUIRK_BROKEN_R1B |
 		       SDHCI_QUIRK_USE_ACMD12;
 
+	if (fdtdec_get_bool(gd->fdt_blob, dev_of_offset(dev), "non-removable"))
+		host->quirks |= SDHCI_QUIRK_NO_CD;
+
 #ifdef CONFIG_ZYNQ_HISPD_BROKEN
 	host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
 #endif

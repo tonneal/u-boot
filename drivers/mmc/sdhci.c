@@ -681,6 +681,17 @@ static int sdhci_init(struct mmc *mmc)
 	return 0;
 }
 
+static int sdhci_get_cd(struct udevice *dev)
+{
+	struct mmc *mmc = mmc_get_mmc_dev(dev);
+	struct sdhci_host *host = mmc->priv;
+
+	if (host->quirks & SDHCI_QUIRK_NO_CD)
+		return -ENOSYS;
+
+	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+}
+
 #ifdef CONFIG_DM_MMC
 int sdhci_probe(struct udevice *dev)
 {
@@ -695,6 +706,7 @@ const struct dm_mmc_ops sdhci_ops = {
 	.set_voltage	= sdhci_set_voltage,
 	.set_uhs	= sdhci_set_uhs,
 	.execute_tuning	= sdhci_execute_tuning,
+	.get_cd         = sdhci_get_cd,
 };
 #else
 static const struct mmc_ops sdhci_ops = {
@@ -704,6 +716,7 @@ static const struct mmc_ops sdhci_ops = {
 	.set_voltage	= sdhci_set_voltage,
 	.set_uhs	= sdhci_set_uhs,
 	.execute_tuning	= sdhci_execute_tuning,
+	.get_cd         = sdhci_get_cd,
 };
 #endif
 

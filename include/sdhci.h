@@ -231,7 +231,7 @@
 #define SDHCI_QUIRK_USE_WIDE8		(1 << 8)
 #define SDHCI_QUIRK_NO_1_8_V		(1 << 9)
 #define SDHCI_QUIRK_USE_ACMD12		(1 << 10)
-
+#define SDHCI_QUIRK_NO_CD			(1 << 11)
 /* to make gcc happy */
 struct sdhci_host;
 
