@@ -207,23 +207,23 @@
 #include <config_distro_bootcmd.h>
 #endif /* CONFIG_SPL_BUILD */
 
-#define IMAGEFILENAME \
-	"blr_fname=BOOT.bin\0" \
-	"env_fname=uEnt.txt\0" \
-	"dtb_fname=devicetree.dtb\0" \
-	"bit_fname=system.bit\0" \
-	"knl_fname=uImage\0" \
-	"rfs_fname=rootfs.jffs2\0" \
-	"opt_fname=opt.jffs2\0" \
-	"ufs_fname=rootfs.cpio.uboot\0" 
-
-#define MEMLOADADDR \
-	"dtb_loadaddr=0x10200000\0" \
-	"knl_loadaddr=0x10300000\0" \
-	"rfs_loadaddr=0x10D00000\0" \
-	"com_loadaddr=0x30D00000\0"
-
-
+#define FWS_MENU \
+"mtd_sfadd_blr=0x00000000\0" \
+"mtd_psize_blr=0x00000000\0" \
+"mtd_sfadd_bak=0x00000000\0" \
+"mtd_psize_bak=0x00000000\0" \
+"mtd_loadb_com=0x00000000\0" \
+"mtd_loadb_knl=0x00000000\0" \
+"mtd_loadb_rfs=0x00000000\0" \
+"mtd_loadb_dtb=0x00000000\0" \
+"mtd_fname_blr=BOOT.bin\0" \
+"mtd_fname_env=uEnt.txt\0" \
+"mtd_fname_dtb=devicetree.dtb\0" \
+"mtd_fname_bit=system.bit\0" \
+"mtd_fname_knl=uImage\0" \
+"mtd_fname_rfs=rootfs.ext2\0" \
+"mtd_fname_opt=opt.ext2\0" \
+"mtd_fname_ufs=rootfs.cpio.uboot\0" 
 
 #define LINUX_4GB_PARTITION_TABLE \
 	"\"start=2MiB," \
@@ -251,20 +251,17 @@
 			"else;" \
 			"fi;" \
 		"fi;\0" \
+/*
 
+*/
 /* Default environment */
 #ifndef CONFIG_EXTRA_ENV_SETTINGS 
 #define CONFIG_EXTRA_ENV_SETTINGS	\
-	IMAGEFILENAME \
-	MEMLOADADDR \
-	"blr_spifaddr=0x00000000\0" \
-	"env_spifaddr=0x001C0000\0" \
-	"blr_partsize=0x000E0000\0" \
-	"env_partsize=0x00020000\0" \
-	"erase_blr=echo Erase Bootloader......; sf erase ${blr_spifaddr} ${blr_partsize}\0" \
-	"flash_blr=echo Flash Bootloader......; mw.b ${blr_loadaddr} 0xFF ${blr_partsize}; fatload mmc 0 ${blr_loadaddr} ${blr_fname}; sf write ${blr_loadaddr} ${blr_spifaddr} ${blr_partsize}\0" \
-	"updatesys=sf probe 0; run erase_blr; run flash_blr\0" \
+	FWS_MENU \
+	"erase_blr=echo Erase Bootloader......; sf erase ${mtd_sfadd_blr} ${mtd_psize_blr}\0" \
+	"flash_blr=echo Flash Bootloader......; mw.b ${mtd_loadb_com} 0xFF ${mtd_psize_blr}; fatload mmc 0 ${mtd_loadb_com} ${mtd_fname_blr}; sf write ${mtd_loadb_com} ${mtd_sfadd_blr} ${mtd_psize_blr}\0" \
 	PARAMETERS_EMMC \
+	"factory_recovery=sf probe 0; run erase_blr; run flash_blr; run partition_emmc; \0" \
 	"sys_boot=sf probe 0 ; " \
 		"sf read ${com_loadaddr} ${bit_spifaddr} ${bit_partsize}; " \
 		"fpga loadb 0 ${com_loadaddr} ${bit_partsize}; " \
