@@ -212,10 +212,10 @@
 "mtd_psize_blr=0x00000000\0" \
 "mtd_sfadd_bak=0x00000000\0" \
 "mtd_psize_bak=0x00000000\0" \
-"mtd_loadb_com=0x00000000\0" \
-"mtd_loadb_knl=0x00000000\0" \
-"mtd_loadb_rfs=0x00000000\0" \
-"mtd_loadb_dtb=0x00000000\0" \
+"mtd_loadb_com=0x10000000\0" \
+"mtd_loadb_knl=0x10300000\0" \
+"mtd_loadb_rfs=0x10D00000\0" \
+"mtd_loadb_dtb=0x10200000\0" \
 "mtd_fname_blr=BOOT.bin\0" \
 "mtd_fname_env=uEnt.txt\0" \
 "mtd_fname_dtb=devicetree.dtb\0" \
@@ -223,12 +223,30 @@
 "mtd_fname_knl=uImage\0" \
 "mtd_fname_rfs=rootfs.ext2\0" \
 "mtd_fname_opt=opt.ext2\0" \
-"mtd_fname_ufs=rootfs.cpio.uboot\0" 
+"mtd_fname_ufs=rootfs.cpio.uboot\0" \
+"mtd_psize_bit=0x084E04E0\0" 
+
+
 
 #define LINUX_4GB_PARTITION_TABLE \
 	"\"start=2MiB," \
 	"name=sysA,size=128MiB;" \
 	"name=sysB,size=128MiB;" \
+	"name=optA,size=128MiB;" \
+	"name=optB,size=128MiB;" \
+	"name=nmsA,size=256MiB;" \
+	"name=nmsB,size=256MiB;" \
+	"name=rsv1,size=256MiB;" \
+	"name=rsv2,size=256MiB;" \
+	"name=rsv3,size=256MiB;" \
+	"name=other,size=-;" \
+	"\""
+
+#define SYSA_LBA (128*2)
+
+#define NEW_LINUX_4GB_PARTITION_TABLE \
+	"\"start=2MiB,name=sysA,size=128MiB;" \
+	"start=2MiB,name=sysB,size=128MiB;" \
 	"name=optA,size=128MiB;" \
 	"name=optB,size=128MiB;" \
 	"name=nmsA,size=256MiB;" \
@@ -263,8 +281,8 @@
 	PARAMETERS_EMMC \
 	"factory_recovery=sf probe 0; run erase_blr; run flash_blr; run partition_emmc; \0" \
 	"sys_boot=sf probe 0 ; " \
-		"sf read ${com_loadaddr} ${bit_spifaddr} ${bit_partsize}; " \
-		"fpga loadb 0 ${com_loadaddr} ${bit_partsize}; " \
+		"sf read ${com_loadaddr} ${bit_spifaddr} ${mtd_psize_bit}; " \
+		"fpga loadb 0 ${com_loadaddr} ${mtd_psize_bit}; " \
 		"sf read ${knl_loadaddr} ${knl_spifaddr} ${knl_partsize}; " \
 		"sf read ${dtb_loadaddr} ${dtb_spifaddr} ${dtb_partsize}; " \
 		"run emmc_args; " \
@@ -274,11 +292,11 @@
 		"run uenvboot; " \
 		"mmc rescan; " \
 		"mmc dev 0; " \
-		"fatload mmc 0 ${com_loadaddr} ${bit_fname}; " \
-		"fpga loadb 0 ${com_loadaddr} ${bit_partsize}; " \
-		"fatload mmc 0 ${knl_loadaddr} ${knl_fname}; " \
-		"fatload mmc 0 ${dtb_loadaddr} ${dtb_fname}; " \
-		"fatload mmc 0 ${rfs_loadaddr} ${ufs_fname}; " \
+		"fatload mmc 0 ${com_loadaddr} ${mtd_fname_bit}; " \
+		"fpga loadb 0 ${com_loadaddr} ${mtd_psize_bit}; " \
+		"fatload mmc 0 ${mtd_loadb_knl} ${mtd_fname_knl}; " \
+		"fatload mmc 0 ${mtd_loadb_dtb} ${mtd_fname_dtb}; " \
+		"fatload mmc 0 ${mtd_loadb_rfs} ${mtd_fname_ufs}; " \
 		"run ram_args; " \
 		"bootm ${knl_loadaddr} ${rfs_loadaddr} ${dtb_loadaddr}; " \
 		"fi\0" \
