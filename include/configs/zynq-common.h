@@ -272,9 +272,40 @@
 /*
 
 */
+
+//for需要空格来表示层级，所以有一排" "
+#define DOUBLE_BAK \
+	"double_bak=" \
+	"test -n \"${BOOT_ORDER}\" || setenv BOOT_ORDER \"A B\";" \
+	"test -n \"${BOOT_A_LEFT}\" || setenv BOOT_A_LEFT 3;" \
+	"test -n \"${BOOT_B_LEFT}\" || setenv BOOT_B_LEFT 3;" \
+	"setenv bootargs;" \
+	"for BOOT_SLOT in \"${BOOT_ORDER}\"; do" \
+	" "	"echo \"Check ${BOOT_SLOT}\"; " \
+	" "	"if test \"x${bootargs}\" != \"x\"; then" \
+	" "	"echo \"break\"; " \
+	" "	"elif test \"x${BOOT_SLOT}\" = \"xA\"; then" \
+	" "		"if test ${BOOT_A_LEFT} -gt 0; then" \
+	" "			"setexpr BOOT_A_LEFT ${BOOT_A_LEFT} - 1;" \
+	" "			"echo \"Found valid slot A, ${BOOT_A_LEFT} attempts remaining\";" \
+	" "			"setenv load_kernel \"nand read ${kernel_loadaddr} ${kernel_a_nandoffset} ${kernel_size}\";" \
+	" "			"setenv bootargs \"${default_bootargs} root=/dev/mmcblk0p1 rauc.slot=A\";" \
+	" "		"fi;" \
+	" "	"elif test \"x${BOOT_SLOT}\" = \"xB\"; then" \
+	" "		"if test ${BOOT_B_LEFT} -gt 0; then" \
+	" "			"setexpr BOOT_B_LEFT ${BOOT_B_LEFT} - 1;" \
+	" "			"echo \"Found valid slot B, ${BOOT_B_LEFT} attempts remaining\";" \
+	" "			"setenv load_kernel \"nand read ${kernel_loadaddr} ${kernel_b_nandoffset} ${kernel_size}\";" \
+	" "			"setenv bootargs \"${default_bootargs} root=/dev/mmcblk0p2 rauc.slot=B\";" \
+	" "		"fi;" \
+	" "	"fi;" \
+	"done;" \
+	"\0\""
+
 /* Default environment */
 #ifndef CONFIG_EXTRA_ENV_SETTINGS 
 #define CONFIG_EXTRA_ENV_SETTINGS	\
+	DOUBLE_BAK \
 	FWS_MENU \
 	"erase_blr=echo Erase Bootloader......; sf erase ${mtd_sfadd_blr} ${mtd_psize_blr}\0" \
 	"flash_blr=echo Flash Bootloader......; mw.b ${mtd_loadb_com} 0xFF ${mtd_psize_blr}; fatload mmc 0 ${mtd_loadb_com} ${mtd_fname_blr}; sf write ${mtd_loadb_com} ${mtd_sfadd_blr} ${mtd_psize_blr}\0" \
