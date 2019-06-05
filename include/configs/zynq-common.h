@@ -288,21 +288,6 @@
 		"run emmc_args; " \
 		"bootm ${knl_loadaddr} - ${dtb_loadaddr}\0 " \
 	"emmc_args=setenv bootargs console=ttyPS0,115200 root=/dev/mtdblock8 rootfstype=jffs2 rw rootwait uio_pdrv_genirq.of_id=generic-uio ${optargs} \0" \
-	"ram_boot=if mmcinfo; then " \
-		"run uenvboot; " \
-		"mmc rescan; " \
-		"mmc dev 0; " \
-		"fatload mmc 0 ${com_loadaddr} ${mtd_fname_bit}; " \
-		"fpga loadb 0 ${com_loadaddr} ${mtd_psize_bit}; " \
-		"fatload mmc 0 ${mtd_loadb_knl} ${mtd_fname_knl}; " \
-		"fatload mmc 0 ${mtd_loadb_dtb} ${mtd_fname_dtb}; " \
-		"fatload mmc 0 ${mtd_loadb_rfs} ${mtd_fname_ufs}; " \
-		"run ram_args; " \
-		"bootm ${knl_loadaddr} ${rfs_loadaddr} ${dtb_loadaddr}; " \
-		"fi\0" \
-	"ram_args=setenv bootargs console=ttyPS0,115200 " \
-		"root=/dev/ram rw earlyprintk${optargs} \0" \
-	"net_boot=\0" \
 	"bootenv=uEnv.txt\0" \
 	"loadbootenv=load mmc 0 ${loadbootenv_addr} ${bootenv}\0" \
 	"importbootenv=echo Importing environment from SD ...; " \

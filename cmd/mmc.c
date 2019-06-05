@@ -327,6 +327,63 @@ static int do_mmc_write(cmd_tbl_t *cmdtp, int flag,
 
 	return (n == cnt) ? CMD_RET_SUCCESS : CMD_RET_FAILURE;
 }
+
+static int do_mmc_image(cmd_tbl_t *cmdtp, int flag,
+			int argc, char * const argv[])
+{
+	struct mmc *mmc;
+	u32 start_blk, blk_cnt, n;
+	u32 part_num;
+	u32 byte_cnt;
+	void *addr;
+
+	if (argc != 4)
+		return CMD_RET_USAGE;
+
+	addr = (void *)simple_strtoul(argv[1], NULL, 16);
+	part_num = simple_strtoul(argv[2], NULL, 16);
+	byte_cnt = simple_strtoul(argv[3], NULL, 16);
+	blk_cnt = ( (byte_cnt/512) + ( (byte_cnt%512)?1:0 ) );
+
+
+//-------------
+	struct blk_desc *desc;
+	disk_partition_t info;
+	int err;
+	int ret;
+
+	ret = blk_get_device_by_str("mmc", "1", &desc);
+	if (ret < 0){
+		return 1;
+	}
+
+	err = part_get_info(desc, part_num, &info);
+	if (err){
+		printf("No such partition:%d\n",part_num);
+		return 1;
+	}
+
+	start_blk = info.start;
+
+//-------------
+
+	mmc = init_mmc_device(curr_device, false);
+	if (!mmc)
+		return CMD_RET_FAILURE;
+
+	printf("\nMMC write: dev # %d, block # %d, count %d ... ",
+	       curr_device, start_blk, blk_cnt);
+
+	if (mmc_getwp(mmc) == 1) {
+		printf("Error: card is write protected!\n");
+		return CMD_RET_FAILURE;
+	}
+	n = blk_dwrite(mmc_get_blk_desc(mmc), start_blk, blk_cnt, addr);
+	printf("%d blocks written: %s\n", n, (n == blk_cnt) ? "OK" : "ERROR");
+
+	return (n == blk_cnt) ? CMD_RET_SUCCESS : CMD_RET_FAILURE;
+}
+
 static int do_mmc_erase(cmd_tbl_t *cmdtp, int flag,
 			int argc, char * const argv[])
 {
@@ -789,6 +846,7 @@ static cmd_tbl_t cmd_mmc[] = {
 	U_BOOT_CMD_MKENT(erase, 3, 0, do_mmc_erase, "", ""),
 	U_BOOT_CMD_MKENT(rescan, 1, 1, do_mmc_rescan, "", ""),
 	U_BOOT_CMD_MKENT(part, 1, 1, do_mmc_part, "", ""),
+	U_BOOT_CMD_MKENT(image, 4, 0, do_mmc_image, "", ""),
 	U_BOOT_CMD_MKENT(dev, 3, 0, do_mmc_dev, "", ""),
 	U_BOOT_CMD_MKENT(list, 1, 1, do_mmc_list, "", ""),
 	U_BOOT_CMD_MKENT(hwpartition, 28, 0, do_mmc_hwpartition, "", ""),
