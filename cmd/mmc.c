@@ -333,6 +333,7 @@ static int do_mmc_image(cmd_tbl_t *cmdtp, int flag,
 {
 	struct mmc *mmc;
 	u32 start_blk, blk_cnt, n;
+	u32 total_blk;
 	u32 part_num;
 	u32 byte_cnt;
 	void *addr;
@@ -364,6 +365,12 @@ static int do_mmc_image(cmd_tbl_t *cmdtp, int flag,
 	}
 
 	start_blk = info.start;
+	total_blk = info.size;
+
+	if ( blk_cnt > total_blk ){
+		printf("Image file exceeds partition size \n");
+		return CMD_RET_FAILURE;
+	}
 
 //-------------
 
