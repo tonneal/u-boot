@@ -657,7 +657,9 @@ CONFIG_SPL_BLK=y
 #
 # Boot count support
 #
-# CONFIG_BOOTCOUNT is not set
+CONFIG_BOOTCOUNT_LIMIT=y
+CONFIG_BOOTCOUNT_ENV=y
+# CONFIG_BOOTCOUNT_EXT is not set
 
 #
 # Clock

@@ -4,14 +4,20 @@
 
 menu "Boot count support"
 
-config BOOTCOUNT
+config BOOTCOUNT_LIMIT
 	bool "Enable Boot count support"
 	help
 	  Enable boot count support, which provides the ability to store the
 	  number of times the board has booted on a number of different
 	  persistent storage mediums.
 
-if BOOTCOUNT
+if BOOTCOUNT_LIMIT
+
+config BOOTCOUNT_ENV
+	bool "Boot counter on environment"
+	depends on BOOTCOUNT_LIMIT
+	help
+	  Add support for maintaining boot count in environment.
 
 config BOOTCOUNT_EXT
 	bool "Boot counter on EXT filesystem"
