@@ -374,7 +374,7 @@ static int do_mmc_image(cmd_tbl_t *cmdtp, int flag,
 
 //-------------
 
-	mmc = init_mmc_device(curr_device, false);
+	mmc = init_mmc_device(1, false); /* only for eMMC */
 	if (!mmc)
 		return CMD_RET_FAILURE;
 
