@@ -158,7 +158,7 @@
 
 /* cc108 requires to be 0xF00000 to have boot.bin with bitstream included */
 # ifndef CONFIG_ENV_OFFSET
-#  define CONFIG_ENV_OFFSET		0x101C0000
+#  define CONFIG_ENV_OFFSET		0x00400000
 # endif
 #endif
 
@@ -209,21 +209,13 @@
 
 #define FWS_MENU \
 "mtd_sfadd_blr=0x00000000\0" \
-"mtd_psize_blr=0x00000000\0" \
-"mtd_sfadd_bak=0x00000000\0" \
-"mtd_psize_bak=0x00000000\0" \
+"mtd_psize_blr=0x00200000\0" \
+"mtd_sfadd_env=0x00400000\0" \
+"mtd_psize_env=0x00100000\0" \
 "mtd_loadb_com=0x10000000\0" \
 "mtd_loadb_knl=0x10300000\0" \
 "mtd_loadb_rfs=0x10D00000\0" \
 "mtd_loadb_dtb=0x10200000\0" \
-"mtd_fname_blr=BOOT.bin\0" \
-"mtd_fname_env=uEnt.txt\0" \
-"mtd_fname_dtb=devicetree.dtb\0" \
-"mtd_fname_bit=system.bit\0" \
-"mtd_fname_knl=uImage\0" \
-"mtd_fname_rfs=rootfs.ext2\0" \
-"mtd_fname_opt=opt.ext2\0" \
-"mtd_fname_ufs=rootfs.cpio.uboot\0" \
 "mtd_psize_bit=0x084E04E0\0" 
 
 
@@ -273,7 +265,10 @@
 
 */
 
-//for需要空格来表示层级，所以有一排" "
+
+/*for需要空格来表示层级，所以有一排" " */
+/*成功启动后将BOOT_A_LEFT/BOOT_B_LEFT重新赋值 */
+/*在 No valid slot found, resetting tries to 3 位置处加入处理机制*/
 #define DOUBLE_BAK \
 	"double_bak=" \
 	"test -n \"${BOOT_ORDER}\" || setenv BOOT_ORDER \"A B\";" \
@@ -281,26 +276,42 @@
 	"test -n \"${BOOT_B_LEFT}\" || setenv BOOT_B_LEFT 3;" \
 	"setenv bootargs;" \
 	"for BOOT_SLOT in \"${BOOT_ORDER}\"; do" \
-	" "	"echo \"Check ${BOOT_SLOT}\"; " \
-	" "	"if test \"x${bootargs}\" != \"x\"; then" \
-	" "	"echo \"break\"; " \
-	" "	"elif test \"x${BOOT_SLOT}\" = \"xA\"; then" \
-	" "		"if test ${BOOT_A_LEFT} -gt 0; then" \
-	" "			"setexpr BOOT_A_LEFT ${BOOT_A_LEFT} - 1;" \
-	" "			"echo \"Found valid slot A, ${BOOT_A_LEFT} attempts remaining\";" \
-	" "			"setenv load_kernel \"nand read ${kernel_loadaddr} ${kernel_a_nandoffset} ${kernel_size}\";" \
-	" "			"setenv bootargs \"${default_bootargs} root=/dev/mmcblk0p1 rauc.slot=A\";" \
-	" "		"fi;" \
-	" "	"elif test \"x${BOOT_SLOT}\" = \"xB\"; then" \
-	" "		"if test ${BOOT_B_LEFT} -gt 0; then" \
-	" "			"setexpr BOOT_B_LEFT ${BOOT_B_LEFT} - 1;" \
-	" "			"echo \"Found valid slot B, ${BOOT_B_LEFT} attempts remaining\";" \
-	" "			"setenv load_kernel \"nand read ${kernel_loadaddr} ${kernel_b_nandoffset} ${kernel_size}\";" \
-	" "			"setenv bootargs \"${default_bootargs} root=/dev/mmcblk0p2 rauc.slot=B\";" \
-	" "		"fi;" \
-	" "	"fi;" \
+	" "  "echo \"Check ${BOOT_SLOT}\"; " \
+	" "  "if test \"x${bootargs}\" != \"x\"; then" \
+	" "  "echo \"break\"; " \
+	" "  "elif test \"x${BOOT_SLOT}\" = \"xA\"; then" \
+	" "  	"if test ${BOOT_A_LEFT} -gt 0; then" \
+	" "  		"setexpr BOOT_A_LEFT ${BOOT_A_LEFT} - 1;" \
+	" "  		"echo \"Found valid slot A, ${BOOT_A_LEFT} attempts remaining\";" \
+	" "  		"setenv boot_part \"mmc 1:1\";" \
+	" "  		"setenv bootargs \"${default_bootargs} root=/dev/mmcblk1p1 ro earlyprintk rootfstype=ext2 rootwait rauc.slot=A\";" \
+	" "  	"fi;" \
+	" "  "elif test \"x${BOOT_SLOT}\" = \"xB\"; then" \
+	" "  	"if test ${BOOT_B_LEFT} -gt 0; then" \
+	" "  		"setexpr BOOT_B_LEFT ${BOOT_B_LEFT} - 1;" \
+	" "  		"echo \"Found valid slot B, ${BOOT_B_LEFT} attempts remaining\";" \
+	" "  		"setenv boot_part \"mmc 1:2\";" \
+	" "  		"setenv bootargs \"${default_bootargs} root=/dev/mmcblk1p2 ro earlyprintk rootfstype=ext2 rootwait rauc.slot=B\";" \
+	" "  	"fi;" \
+	" "  "fi;" \
 	"done;" \
-	"\0\""
+	"if test -n \"${bootargs}\"; then" \
+	" saveenv;" \
+	"else" \
+	" echo \"No valid slot found, resetting tries to 3\";" \
+	" setenv BOOT_A_LEFT 3;" \
+	" setenv BOOT_B_LEFT 3;" \
+  	" saveenv;" \
+  	" reset;" \
+	"fi;" \
+	"echo \"Loading Kernel\";" \
+	"ext4load ${boot_part} ${mtd_loadb_com} /boot/system.bit;" \
+	"fpga loadb 0 ${mtd_loadb_com} ${filesize};" \
+	"ext4load ${boot_part} ${mtd_loadb_knl} /boot/uImage;" \
+	"ext4load ${boot_part} ${mtd_loadb_dtb} /boot/devicetree.dtb;" \
+	"bootm ${mtd_loadb_knl} - ${mtd_loadb_dtb}" \
+	"\0"
+
 
 /* Default environment */
 #ifndef CONFIG_EXTRA_ENV_SETTINGS 
@@ -308,22 +319,15 @@
 	DOUBLE_BAK \
 	FWS_MENU \
 	"erase_blr=echo Erase Bootloader......; sf erase ${mtd_sfadd_blr} ${mtd_psize_blr}\0" \
-	"flash_blr=echo Flash Bootloader......; mw.b ${mtd_loadb_com} 0xFF ${mtd_psize_blr}; fatload mmc 0 ${mtd_loadb_com} ${mtd_fname_blr}; sf write ${mtd_loadb_com} ${mtd_sfadd_blr} ${mtd_psize_blr}\0" \
+	"flash_blr=echo Flash Bootloader......; mw.b ${mtd_loadb_com} 0xFF ${mtd_psize_blr}; fatload mmc 0 ${mtd_loadb_com} BOOT.bin; sf write ${mtd_loadb_com} ${mtd_sfadd_blr} ${filesize}\0" \
+	"erase_env=echo Erase Environment.....; sf erase ${mtd_sfadd_env} ${mtd_psize_env}\0" \
 	PARAMETERS_EMMC \
 	"factory_recovery=sf probe 0; run erase_blr; run flash_blr; run partition_emmc; \0" \
-	"sys_boot=sf probe 0 ; " \
-		"sf read ${com_loadaddr} ${bit_spifaddr} ${mtd_psize_bit}; " \
-		"fpga loadb 0 ${com_loadaddr} ${mtd_psize_bit}; " \
-		"sf read ${knl_loadaddr} ${knl_spifaddr} ${knl_partsize}; " \
-		"sf read ${dtb_loadaddr} ${dtb_spifaddr} ${dtb_partsize}; " \
-		"run emmc_args; " \
-		"bootm ${knl_loadaddr} - ${dtb_loadaddr}\0 " \
-	"emmc_args=setenv bootargs console=ttyPS0,115200 root=/dev/mtdblock8 rootfstype=jffs2 rw rootwait uio_pdrv_genirq.of_id=generic-uio ${optargs} \0" \
-	"bootenv=uEnv.txt\0" \
-	"loadbootenv=load mmc 0 ${loadbootenv_addr} ${bootenv}\0" \
+	"default_bootargs=console=ttyPS0,115200 uio_pdrv_genirq.of_id=generic-uio ${optargs}\0" \
+	"loadbootenv=load mmc 0 ${mtd_loadb_com} uEnv.txt\0" \
 	"importbootenv=echo Importing environment from SD ...; " \
-		"env import -t ${loadbootenv_addr} $filesize\0" \
-	"sd_uEnvtxt_existence_test=test -e mmc 0 /uEnv.txt\0" \
+		"env import -t ${mtd_loadb_com} ${filesize}\0" \
+	"sd_uEnvtxt_existence_test=test -e mmc 0 uEnv.txt\0" \
 	"preboot=if test $modeboot = sdboot && env run sd_uEnvtxt_existence_test; " \
 			"then if env run loadbootenv; " \
 				"then env run importbootenv; " \
@@ -331,7 +335,6 @@
 		"fi; \0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
-			"echo Loaded environment from ${bootenv}; " \
 			"run importbootenv; " \
 		"fi; " \
 		"if test -n $uenvcmd; then " \
