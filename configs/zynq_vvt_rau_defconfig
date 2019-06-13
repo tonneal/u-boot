@@ -235,7 +235,7 @@ CONFIG_BOOTSTAGE_STASH_SIZE=0x1000
 CONFIG_BOOTDELAY=2
 # CONFIG_USE_BOOTARGS is not set
 CONFIG_USE_BOOTCOMMAND=y
-CONFIG_BOOTCOMMAND="run $modeboot || run distro_bootcmd"
+CONFIG_BOOTCOMMAND="run $modeboot"
 
 #
 # Console
@@ -334,7 +334,10 @@ CONFIG_SYS_PROMPT="Zynq> "
 # Autoboot options
 #
 CONFIG_AUTOBOOT=y
-# CONFIG_AUTOBOOT_KEYED is not set
+CONFIG_AUTOBOOT_KEYED=y
+CONFIG_AUTOBOOT_PROMPT="Autoboot in %d seconds\n"
+CONFIG_AUTOBOOT_ENCRYPTION=y
+CONFIG_AUTOBOOT_STOP_STR_SHA256="qqq"
 
 #
 # FASTBOOT
@@ -410,7 +413,7 @@ CONFIG_CMD_MEMORY=y
 #
 # Compression commands
 #
-# CONFIG_CMD_LZMADEC is not set
+CONFIG_CMD_LZMADEC=y
 # CONFIG_CMD_UNZIP is not set
 # CONFIG_CMD_ZIP is not set
 
@@ -468,7 +471,7 @@ CONFIG_CMD_USB=y
 CONFIG_CMD_ECHO=y
 CONFIG_CMD_ITEST=y
 CONFIG_CMD_SOURCE=y
-# CONFIG_CMD_SETEXPR is not set
+CONFIG_CMD_SETEXPR=y
 
 #
 # Network commands
@@ -1144,7 +1147,7 @@ CONFIG_MD5=y
 # Compression Support
 #
 # CONFIG_LZ4 is not set
-# CONFIG_LZMA is not set
+CONFIG_LZMA=y
 # CONFIG_LZO is not set
 # CONFIG_SPL_LZO is not set
 # CONFIG_SPL_GZIP is not set
