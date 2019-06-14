@@ -146,8 +146,13 @@
 # define CONFIG_SYS_I2C_MUX_EEPROM_SEL		0x4
 #endif
 
+#define CONFIG_SYS_REDUNDAND_ENVIRONMENT
+
 /* Total Size of Environment Sector */
 #define CONFIG_ENV_SIZE			(128 << 10)
+#ifdef CONFIG_SYS_REDUNDAND_ENVIRONMENT
+	#define CONFIG_ENV_SIZE_REDUND	CONFIG_ENV_SIZE
+#endif
 
 /* Allow to overwrite serial and ethaddr */
 #define CONFIG_ENV_OVERWRITE
@@ -159,6 +164,9 @@
 /* cc108 requires to be 0xF00000 to have boot.bin with bitstream included */
 # ifndef CONFIG_ENV_OFFSET
 #  define CONFIG_ENV_OFFSET		0x00400000
+    #ifdef CONFIG_SYS_REDUNDAND_ENVIRONMENT
+       #define CONFIG_ENV_OFFSET_REDUND		0x00500000
+    #endif
 # endif
 #endif
 
