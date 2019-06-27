@@ -291,15 +291,21 @@
 	" "  	"if test ${BOOT_A_LEFT} -gt 0; then" \
 	" "  		"setexpr BOOT_A_LEFT ${BOOT_A_LEFT} - 1;" \
 	" "  		"echo \"Found valid slot A, ${BOOT_A_LEFT} attempts remaining\";" \
-	" "  		"setenv boot_part \"mmc 1:1\";" \
-	" "  		"setenv bootargs \"${default_bootargs} root=/dev/mmcblk1p1 ro earlyprintk rootfstype=ext2 rootwait rauc.slot=A\";" \
+	" "  		"fatload mmc 1:1 ${mtd_loadb_knl} system.bit;" \
+	" "  		"fpga loadb 0 ${mtd_loadb_com} ${filesize};" \
+	" "  		"fatload mmc 1:1 ${mtd_loadb_knl} uImage;" \
+	" "  		"fatload mmc 1:1 ${mtd_loadb_dtb} devicetree.dtb;" \
+	" "  		"setenv bootargs \"${default_bootargs} root=/dev/mmcblk1p3 ro earlyprintk rootfstype=ext4 rootwait rauc.slot=A\";" \
 	" "  	"fi;" \
 	" "  "elif test \"x${BOOT_SLOT}\" = \"xB\"; then" \
 	" "  	"if test ${BOOT_B_LEFT} -gt 0; then" \
 	" "  		"setexpr BOOT_B_LEFT ${BOOT_B_LEFT} - 1;" \
 	" "  		"echo \"Found valid slot B, ${BOOT_B_LEFT} attempts remaining\";" \
-	" "  		"setenv boot_part \"mmc 1:2\";" \
-	" "  		"setenv bootargs \"${default_bootargs} root=/dev/mmcblk1p2 ro earlyprintk rootfstype=ext2 rootwait rauc.slot=B\";" \
+	" "  		"fatload mmc 1:2 ${mtd_loadb_knl} system.bit;" \
+	" "  		"fpga loadb 0 ${mtd_loadb_com} ${filesize};" \
+	" "  		"fatload mmc 1:2 ${mtd_loadb_knl} uImage;" \
+	" "  		"fatload mmc 1:2 ${mtd_loadb_dtb} devicetree.dtb;" \
+	" "  		"setenv bootargs \"${default_bootargs} root=/dev/mmcblk1p4 ro earlyprintk rootfstype=ext4 rootwait rauc.slot=B\";" \
 	" "  	"fi;" \
 	" "  "fi;" \
 	"done;" \
@@ -313,10 +319,6 @@
   	" reset;" \
 	"fi;" \
 	"echo \"Loading Kernel\";" \
-	"ext4load ${boot_part} ${mtd_loadb_com} /boot/system.bit;" \
-	"fpga loadb 0 ${mtd_loadb_com} ${filesize};" \
-	"ext4load ${boot_part} ${mtd_loadb_knl} /boot/uImage;" \
-	"ext4load ${boot_part} ${mtd_loadb_dtb} /boot/devicetree.dtb;" \
 	"bootm ${mtd_loadb_knl} - ${mtd_loadb_dtb}" \
 	"\0"
 
