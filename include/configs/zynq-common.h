@@ -295,7 +295,7 @@
 	" "  		"fpga loadb 0 ${mtd_loadb_com} ${filesize};" \
 	" "  		"fatload mmc 1:1 ${mtd_loadb_knl} uImage;" \
 	" "  		"fatload mmc 1:1 ${mtd_loadb_dtb} devicetree.dtb;" \
-	" "  		"setenv bootargs \"${default_bootargs} root=/dev/mmcblk1p3 ro earlyprintk rootfstype=ext4 rootwait rauc.slot=A\";" \
+	" "  		"setenv bootargs \"${default_bootargs} mem=1024M root=/dev/mmcblk1p3 ro earlyprintk rootfstype=ext4 rootwait rauc.slot=A\";" \
 	" "  	"fi;" \
 	" "  "elif test \"x${BOOT_SLOT}\" = \"xB\"; then" \
 	" "  	"if test ${BOOT_B_LEFT} -gt 0; then" \
@@ -305,7 +305,7 @@
 	" "  		"fpga loadb 0 ${mtd_loadb_com} ${filesize};" \
 	" "  		"fatload mmc 1:2 ${mtd_loadb_knl} uImage;" \
 	" "  		"fatload mmc 1:2 ${mtd_loadb_dtb} devicetree.dtb;" \
-	" "  		"setenv bootargs \"${default_bootargs} root=/dev/mmcblk1p4 ro earlyprintk rootfstype=ext4 rootwait rauc.slot=B\";" \
+	" "  		"setenv bootargs \"${default_bootargs} mem=1024M root=/dev/mmcblk1p4 ro earlyprintk rootfstype=ext4 rootwait rauc.slot=B\";" \
 	" "  	"fi;" \
 	" "  "fi;" \
 	"done;" \
