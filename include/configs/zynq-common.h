@@ -220,39 +220,25 @@
 "mtd_psize_blr=0x00200000\0" \
 "mtd_sfadd_env=0x00400000\0" \
 "mtd_psize_env=0x00100000\0" \
-"mtd_loadb_com=0x10000000\0" \
-"mtd_loadb_knl=0x10300000\0" \
-"mtd_loadb_rfs=0x10D00000\0" \
-"mtd_loadb_dtb=0x10200000\0" \
+"mtd_loadb_com=0x01A10000\0" \
+"mtd_loadb_knl=0x01000000\0" \
+"mtd_loadb_dtb=0x01A00000\0" \
 "mtd_psize_bit=0x084E04E0\0" 
 
 
 
 #define LINUX_4GB_PARTITION_TABLE \
 	"\"start=2MiB," \
+	"name=booA,size=64MiB;" \
+	"name=booB,size=64MiB;" \
 	"name=sysA,size=128MiB;" \
 	"name=sysB,size=128MiB;" \
 	"name=optA,size=128MiB;" \
 	"name=optB,size=128MiB;" \
 	"name=nmsA,size=256MiB;" \
 	"name=nmsB,size=256MiB;" \
-	"name=rsv1,size=256MiB;" \
-	"name=rsv2,size=256MiB;" \
-	"name=rsv3,size=256MiB;" \
-	"name=other,size=-;" \
-	"\""
-
-#define SYSA_LBA (128*2)
-
-#define NEW_LINUX_4GB_PARTITION_TABLE \
-	"\"start=2MiB,name=sysA,size=128MiB;" \
-	"start=2MiB,name=sysB,size=128MiB;" \
-	"name=optA,size=128MiB;" \
-	"name=optB,size=128MiB;" \
-	"name=nmsA,size=256MiB;" \
-	"name=nmsB,size=256MiB;" \
-	"name=rsv1,size=256MiB;" \
-	"name=rsv2,size=256MiB;" \
+	"name=rsv1,size=128MiB;" \
+	"name=rsv2,size=128MiB;" \
 	"name=rsv3,size=256MiB;" \
 	"name=other,size=-;" \
 	"\""

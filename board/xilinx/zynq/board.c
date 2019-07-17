@@ -113,13 +113,13 @@ int board_late_init(void)
 
 	switch ((zynq_slcr_get_boot_mode()) & ZYNQ_BM_MASK) {
 	case ZYNQ_BM_QSPI:
-		env_set("modeboot", "sys_boot");
+		env_set("modeboot", "double_bak");
 		break;
 	case ZYNQ_BM_SD:
-		env_set("modeboot", "ram_boot");
+		env_set("modeboot", "scr_boot");
 		break;
 	default:
-		env_set("modeboot", "sys_boot");
+		env_set("modeboot", "double_bak");
 		break;
 	}
 
