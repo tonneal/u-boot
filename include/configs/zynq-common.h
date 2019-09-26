@@ -229,18 +229,18 @@
 
 #define LINUX_4GB_PARTITION_TABLE \
 	"\"start=2MiB," \
-	"name=booA,size=64MiB;" \
-	"name=booB,size=64MiB;" \
-	"name=sysA,size=128MiB;" \
-	"name=sysB,size=128MiB;" \
-	"name=optA,size=128MiB;" \
-	"name=optB,size=128MiB;" \
-	"name=nmsA,size=256MiB;" \
-	"name=nmsB,size=256MiB;" \
-	"name=rsv1,size=128MiB;" \
-	"name=rsv2,size=128MiB;" \
-	"name=rsv3,size=256MiB;" \
-	"name=other,size=-;" \
+	"name=bloA,size=64MiB;" \
+	"name=sysA,size=176MiB;" \
+	"name=pspA,size=64MiB;" \
+	"name=bloB,size=64MiB;" \
+	"name=sysB,size=176MiB;" \
+	"name=pspB,size=64MiB;" \
+	"name=oam,size=128MiB;" \
+	"name=uda,size=64MiB;" \
+	"name=log,size=64MiB;" \
+	"name=rsv,size=64MiB;" \
+	"name=bak,size=2048MiB;" \
+	"name=ots,size=-;" \
 	"\""
 
 #define PARAMETERS_EMMC \
@@ -281,7 +281,7 @@
 	" "  		"fpga loadb 0 ${mtd_loadb_com} ${filesize};" \
 	" "  		"fatload mmc 1:1 ${mtd_loadb_knl} uImage;" \
 	" "  		"fatload mmc 1:1 ${mtd_loadb_dtb} devicetree.dtb;" \
-	" "  		"setenv bootargs \"${default_bootargs} mem=1024M root=/dev/mmcblk1p3 ro earlyprintk rootfstype=ext4 rootwait rauc.slot=A\";" \
+	" "  		"setenv bootargs \"${default_bootargs} mem=1024M root=/dev/mmcblk1p2 ro earlyprintk rootfstype=ext4 rootwait rauc.slot=A\";" \
 	" "  	"fi;" \
 	" "  "elif test \"x${BOOT_SLOT}\" = \"xB\"; then" \
 	" "  	"if test ${BOOT_B_LEFT} -gt 0; then" \
@@ -291,7 +291,7 @@
 	" "  		"fpga loadb 0 ${mtd_loadb_com} ${filesize};" \
 	" "  		"fatload mmc 1:2 ${mtd_loadb_knl} uImage;" \
 	" "  		"fatload mmc 1:2 ${mtd_loadb_dtb} devicetree.dtb;" \
-	" "  		"setenv bootargs \"${default_bootargs} mem=1024M root=/dev/mmcblk1p4 ro earlyprintk rootfstype=ext4 rootwait rauc.slot=B\";" \
+	" "  		"setenv bootargs \"${default_bootargs} mem=1024M root=/dev/mmcblk1p5 ro earlyprintk rootfstype=ext4 rootwait rauc.slot=B\";" \
 	" "  	"fi;" \
 	" "  "fi;" \
 	"done;" \
